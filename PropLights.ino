@@ -1,21 +1,28 @@
 // C++ code
-// Sets up 5 options for connecting LEDs for Props
+// Sets up 6 options for connecting LEDs for Props
 
-const int SLOW_PIN = A1;
-const int FAST_PIN = A2;
-const int RANDOM_PIN = A3;
-const int SOLID_PIN = A4;
-const int OPP_SLOW_PIN = A5;
+// Using Digital Pins
+const int RANDOM_MOSTLY_ON_PIN = 2;
+const int OPP_SLOW_PIN = 3; // PWM Pin if fading is desired in the future
+const int RANDOM_MOSTLY_OFF_PIN = 4;
+const int FAST_PIN = 5;     // PWM Pin if fading is desired in the future
+const int SLOW_PIN = 6;     // PWM Pin if fading is desired in the future
+const int SOLID_PIN = 13;
 
 // --- Alternating Lights Setup ---
 const unsigned long altInterval = 1000; // Alternates every 1000ms (1 sec)
 unsigned long previousAltMillis = 0;
 bool altState = false;
 
-// --- Random Light Setup ---
-unsigned long previousRandomMillis = 0;
-unsigned long randomInterval = 100; // Initial random delay
-bool randomState = false;
+// --- Random Mostly On Light Setup ---
+unsigned long previousRandomMostlyOnMillis = 0;
+unsigned long randomMostlyOnInterval = 100; // Initial random delay
+bool randomMostlyOnState = false;
+
+// --- Random Mostly Off Light Setup ---
+unsigned long previousRandomMostlyOffMillis = 0;
+unsigned long randomMostlyOffInterval = 100; // Initial random delay
+bool randomMostlyOffState = false;
 
 // --- Fast Blinking Setup ---
 const unsigned long fastInterval = 400; // Blink every 400ms
@@ -26,14 +33,14 @@ void setup()
 {
   pinMode(SLOW_PIN, OUTPUT);
   pinMode(FAST_PIN, OUTPUT);
-  pinMode(RANDOM_PIN, OUTPUT);
+  pinMode(RANDOM_MOSTLY_ON_PIN, OUTPUT);
   pinMode(SOLID_PIN, OUTPUT);
   pinMode(OPP_SLOW_PIN, OUTPUT);
   randomSeed(analogRead(A0));
   
   digitalWrite(SLOW_PIN, LOW);
   digitalWrite(FAST_PIN, LOW);
-  digitalWrite(RANDOM_PIN, LOW);
+  digitalWrite(RANDOM_MOSTLY_ON_PIN, LOW);
   digitalWrite(SOLID_PIN, LOW);
   digitalWrite(OPP_SLOW_PIN, LOW);
 }
@@ -62,25 +69,43 @@ void loop()
   }
   
   // ----------------------
-  // TASK 2: Randomly Blink Light
+  // TASK 2: Randomly Blink Light - Mostly On
   // ----------------------
-  if (currentMillis - previousRandomMillis >= randomInterval) {
-    previousRandomMillis = currentMillis;
+  if (currentMillis - previousRandomMostlyOnMillis >= randomMostlyOnInterval) {
+    previousRandomMostlyOnMillis = currentMillis;
 
     // Toggle the random light state
-    randomState = !randomState;
-    digitalWrite(RANDOM_PIN, randomState ? HIGH : LOW);
+    randomMostlyOnState = !randomMostlyOnState;
+    digitalWrite(RANDOM_MOSTLY_ON_PIN, randomMostlyOnState ? HIGH : LOW);
 
     // Pick a new random duration for the state (between 50ms flicker and 600ms hold)
-    if (randomState) {
-      randomInterval = random(100, 1000);  // How long the light stays ON
+    if (randomMostlyOnState) {
+      randomMostlyOnInterval = random(100, 1000);  // How long the light stays ON
     } else {
-      randomInterval = random(50, 400); // How long the light stays OFF
+      randomMostlyOnInterval = random(50, 400); // How long the light stays OFF
+    }
+  }
+
+  // ----------------------
+  // TASK 3: Randomly Blink Light - Mostly Off
+  // ----------------------
+  if (currentMillis - previousRandomMostlyOffMillis >= randomMostlyOffInterval) {
+    previousRandomMostlyOffMillis = currentMillis;
+
+    // Toggle the random light state
+    randomMostlyOffState = !randomMostlyOffState;
+    digitalWrite(RANDOM_MOSTLY_OFF_PIN, randomMostlyOffState ? HIGH : LOW);
+
+    // Pick a new random duration for the state (between 50ms flicker and 600ms hold)
+    if (randomMostlyOffState) {
+      randomMostlyOffInterval = random(250, 600);  // How long the light stays ON
+    } else {
+      randomMostlyOffInterval = random(1000, 2500); // How long the light stays OFF
     }
   }
   
   // ----------------------
-  // TASK 3: Fast Blink Light
+  // TASK 4: Fast Blink Light
   // ----------------------
   if (currentMillis - previousFastMillis >= fastInterval) {
     previousFastMillis = currentMillis;
